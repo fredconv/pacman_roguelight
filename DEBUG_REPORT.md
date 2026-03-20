@@ -41,7 +41,7 @@ Ouvrir Godot → Lancer res://test/PlayerTestScene.tscn
 ### Option B: Test dans le Jeu Complet
 
 ```
-Ouvrir Godot → Lancer res://scenes/GameSimple.tscn
+Ouvrir Godot → Lancer res://scenes/core/GameSimple.tscn
 ```
 
 ### Option C: Vérification Manuelle

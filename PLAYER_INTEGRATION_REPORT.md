@@ -56,7 +56,7 @@ res://test/PlayerTestScene2.tscn
 # Lancer une scène de jeu existante qui utilise maintenant Player.tscn:
 res://scenes/levels/Level1.tscn
 # ou
-res://scenes/GameSimple.tscn
+res://scenes/core/GameSimple.tscn
 ```
 
 ### Option C: Test Manuel dans l'Éditeur
