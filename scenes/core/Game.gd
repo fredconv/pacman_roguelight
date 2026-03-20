@@ -487,7 +487,7 @@ func _load_main_menu():
 	else:
 		# Méthode 2: Changement direct de scène (fallback)
 		print("⚠️ SceneManager non trouvé - changement direct de scène")
-				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+		get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
 
 func _load_level(level_num: int):
 	"""Charger un niveau spécifique et réinitialiser le jeu"""
@@ -501,7 +501,9 @@ func _load_level(level_num: int):
 	# Réinitialiser le niveau complet
 	reset_level_state(level_num)
 
-	print("✅ Niveau ", level_num, " chargé avec succès!")# === FONCTIONS UTILITAIRES POUR SIMPLIFIER LE CODE UI ===
+	print("✅ Niveau ", level_num, " chargé avec succès!")
+
+# === FONCTIONS UTILITAIRES POUR SIMPLIFIER LE CODE UI ===
 
 func create_styled_box(bg_color: Color, border_color: Color, corner_radius: int = 10, border_width: int = 2) -> StyleBoxFlat:
 	"""Créer un StyleBoxFlat avec les paramètres donnés"""
