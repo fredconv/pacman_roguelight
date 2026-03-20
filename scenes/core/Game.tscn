@@ -1,11 +1,11 @@
 [gd_scene load_steps=7 format=3 uid="uid://bwtgq3jylmcbp"]
 
-[ext_resource type="Script" path="res://scenes/Game.gd" id="1_dgv5u"]
-[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_3r4wd"]
-[ext_resource type="Script" path="res://scenes/Maze.gd" id="3_h5xry"]
+[ext_resource type="Script" path="res://scenes/core/Game.gd" id="1_dgv5u"]
+[ext_resource type="PackedScene" path="res://scenes/actors/Player.tscn" id="2_3r4wd"]
+[ext_resource type="Script" path="res://scenes/world/Maze.gd" id="3_h5xry"]
 [ext_resource type="Texture2D" uid="uid://bl52hse76swf7" path="res://sprites/111-1117023_pixel-art-pac-man-png-download-pacman-sprite.png" id="5_q7uqf"]
-[ext_resource type="Script" path="res://scenes/UpgradeScreen.gd" id="6_upgrade"]
-[ext_resource type="Script" path="res://scenes/HUD.gd" id="7_hud"]
+[ext_resource type="Script" path="res://scenes/ui/UpgradeScreen.gd" id="6_upgrade"]
+[ext_resource type="Script" path="res://scenes/ui/HUD.gd" id="7_hud"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_h8y4u"]
 radius = 14.0

@@ -1,6 +1,6 @@
 [gd_scene load_steps=18 format=3 uid="uid://cpy3q3q5np1fm"]
 
-[ext_resource type="Script" uid="uid://dcnqh4xe4ax0s" path="res://scenes/pacman.gd" id="1_7j5nq"]
+[ext_resource type="Script" uid="uid://dcnqh4xe4ax0s" path="res://scenes/actors/pacman.gd" id="1_7j5nq"]
 [ext_resource type="Texture2D" uid="uid://dn5n35q1uw6no" path="res://Assets/Pacman/Pacman_03.png" id="1_kcrxf"]
 [ext_resource type="Texture2D" uid="uid://bh35fl0wqe63" path="res://Assets/Pacman/Pacman_01.png" id="2_pacman"]
 [ext_resource type="Texture2D" uid="uid://bbgj23q7gam4f" path="res://Assets/Pacman/Pacman_Death_01.png" id="2_pmluw"]

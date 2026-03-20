@@ -223,7 +223,7 @@ func create_wall(pos: Vector2):
 	walls.append(wall)
 
 func create_dot(pos: Vector2):
-	var dot_scene = preload("res://scenes/Dot.gd")
+	var dot_scene = preload("res://scenes/world/Dot.gd")
 	var dot = Area2D.new()
 	dot.set_script(dot_scene)
 	dot.position = pos + Vector2(cell_size * 0.5, cell_size * 0.5)
@@ -233,7 +233,7 @@ func create_dot(pos: Vector2):
 	dots.append(dot)
 
 func create_power_pellet(pos: Vector2):
-	var pellet_scene = preload("res://scenes/PowerPellet.gd")
+	var pellet_scene = preload("res://scenes/world/PowerPellet.gd")
 	var pellet = Area2D.new()
 	pellet.set_script(pellet_scene)
 	pellet.position = pos + Vector2(cell_size * 0.5, cell_size * 0.5)

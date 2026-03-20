@@ -5,7 +5,7 @@ func _ready():
 	print("🧪 === TEST CHARGEMENT PLAYER ===")
 
 	# Essayer de charger la scène Player
-	var player_scene = load("res://scenes/Player.tscn")
+		var player_scene = load("res://scenes/actors/Player.tscn")
 	if player_scene:
 		print("✅ Player.tscn chargé avec succès")
 

@@ -5,7 +5,7 @@ func _ready():
 	print("🧪 === TEST PLAYER MODULAIRE ===")
 
 	# Créer une instance du Player modulaire
-	var player_scene = preload("res://scenes/Player.tscn")
+	var player_scene = preload("res://scenes/actors/Player.tscn")
 	var player = player_scene.instantiate()
 
 	# Position le player au centre

@@ -126,3 +126,35 @@ load_scene("stats")       # Statistiques joueur
 ---
 
 **Système de navigation maintenant parfaitement modulaire !** 🎉
+
+## 🗂️ Migration Structure `scenes/` (2026-03-20)
+
+Le dossier `scenes/` a été réorganisé pour une structure plus claire.
+
+### Nouvelle arborescence
+
+- `res://scenes/core/` : scènes de jeu principales
+- `res://scenes/ui/` : menu et UI
+- `res://scenes/world/` : éléments du monde (maze, dots, pellets)
+- `res://scenes/actors/` : player, ghosts, scripts acteurs
+- `res://scenes/managers/` : SceneManager / GameManager
+- `res://scenes/debug/` : scènes et scripts de debug
+
+### Mapping des chemins principaux
+
+- `res://scenes/MainGame.tscn` -> `res://scenes/core/MainGame.tscn`
+- `res://scenes/Game.tscn` -> `res://scenes/core/Game.tscn`
+- `res://scenes/GameSimple.tscn` -> `res://scenes/core/GameSimple.tscn`
+- `res://scenes/MainMenu.tscn` -> `res://scenes/ui/MainMenu.tscn`
+- `res://scenes/Maze.gd` -> `res://scenes/world/Maze.gd`
+- `res://scenes/Dot.gd` -> `res://scenes/world/Dot.gd`
+- `res://scenes/PowerPellet.gd` -> `res://scenes/world/PowerPellet.gd`
+- `res://scenes/Player.tscn` -> `res://scenes/actors/Player.tscn`
+- `res://scenes/GhostSafe.tscn` -> `res://scenes/actors/GhostSafe.tscn`
+- `res://scenes/SceneManager.gd` -> `res://scenes/managers/SceneManager.gd`
+- `res://scenes/GameManager.gd` -> `res://scenes/managers/GameManager.gd`
+
+### Impact
+
+- `project.godot` a été mis à jour (main scene + autoloads).
+- Les imports `ext_resource` et `preload/load` impactés ont été ajustés dans les scripts/scènes/tests.

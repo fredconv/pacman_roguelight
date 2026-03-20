@@ -39,11 +39,11 @@ enum SceneType {
 # IMPORTANT : Tous les niveaux utilisent GameSimple.tscn pour l'instant
 # car c'est la version qui fonctionne correctement
 const SCENE_PATHS = {
-	SceneType.MAIN_MENU: "res://scenes/MainMenu.tscn",      # Menu principal
-	SceneType.LEVEL_1: "res://scenes/GameSimple.tscn",      # Niveau 1
-	SceneType.LEVEL_2: "res://scenes/GameSimple.tscn",      # Niveau 2 (même scène)
-	SceneType.LEVEL_3: "res://scenes/GameSimple.tscn",      # Niveau 3 (même scène)
-	SceneType.LEVEL_4: "res://scenes/GameSimple.tscn"       # Niveau 4 (même scène)
+	SceneType.MAIN_MENU: "res://scenes/ui/MainMenu.tscn",      # Menu principal
+	SceneType.LEVEL_1: "res://scenes/core/GameSimple.tscn",      # Niveau 1
+	SceneType.LEVEL_2: "res://scenes/core/GameSimple.tscn",      # Niveau 2 (même scène)
+	SceneType.LEVEL_3: "res://scenes/core/GameSimple.tscn",      # Niveau 3 (même scène)
+	SceneType.LEVEL_4: "res://scenes/core/GameSimple.tscn"       # Niveau 4 (même scène)
 }
 
 # ═══ VARIABLES D'ÉTAT POUR LE SUIVI DE LA SCÈNE ACTUELLE ═══

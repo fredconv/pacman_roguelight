@@ -487,7 +487,7 @@ func _load_main_menu():
 	else:
 		# Méthode 2: Changement direct de scène (fallback)
 		print("⚠️ SceneManager non trouvé - changement direct de scène")
-		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
 
 func _load_level(level_num: int):
 	"""Charger un niveau spécifique et réinitialiser le jeu"""
@@ -634,7 +634,7 @@ func spawn_ghost():
 	# Version sécurisée avec fallback
 	print("👻 Tentative de spawn du fantôme...")
 
-	var ghost_scene_path = "res://scenes/GhostSafe.tscn"  # Version sécurisée
+	var ghost_scene_path = "res://scenes/actors/GhostSafe.tscn"  # Version sécurisée
 
 	# Vérifier que la ressource existe
 	if not ResourceLoader.exists(ghost_scene_path):

@@ -39,8 +39,8 @@ enum SceneType {
 # Association entre types de scènes et fichiers physiques
 # PRINCIPE : Un type de scène = Un fichier .tscn
 const SCENE_PATHS = {
-	SceneType.MAIN_MENU: "res://scenes/MainMenu.tscn",
-	SceneType.GAME_LEVEL: "res://scenes/Game.tscn",  # Utilise Game.tscn (version complète)
+	SceneType.MAIN_MENU: "res://scenes/ui/MainMenu.tscn",
+	SceneType.GAME_LEVEL: "res://scenes/core/Game.tscn",  # Utilise Game.tscn (version complète)
 	SceneType.SETTINGS: "res://scenes/Settings.tscn",    # Futur
 	SceneType.CREDITS: "res://scenes/Credits.tscn"       # Futur
 }

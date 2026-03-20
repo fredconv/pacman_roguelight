@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bt7k4xjv8b5n5"]
 
-[ext_resource type="Script" path="res://scenes/SimpleGhostSafe.gd" id="1_ghost_safe"]
+[ext_resource type="Script" path="res://scenes/actors/SimpleGhostSafe.gd" id="1_ghost_safe"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ghost_safe"]
 radius = 12.0

@@ -25,7 +25,7 @@ func setup_level():
 
 func create_maze():
 	"""Créer le maze niveau 1"""
-	var maze_script = preload("res://scenes/Maze.gd")
+	var maze_script = preload("res://scenes/world/Maze.gd")
 	maze = maze_script.new()
 
 	# Générer le niveau 1
@@ -37,7 +37,7 @@ func create_maze():
 
 func create_player():
 	"""Créer et positionner le joueur"""
-	var player_scene = preload("res://scenes/Player.tscn")
+	var player_scene = preload("res://scenes/actors/Player.tscn")
 	player = player_scene.instantiate()
 	ui_container.add_child(player)
 
