@@ -1,0 +1,42 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://core/entity/Entity.gd" id="1"]
+[ext_resource type="Script" path="res://core/entity/components/MovementComponent.gd" id="2"]
+[ext_resource type="Script" path="res://core/entity/components/StatsComponent.gd" id="3"]
+[ext_resource type="Script" path="res://core/entity/components/HealthComponent.gd" id="4"]
+[ext_resource type="Script" path="res://core/entity/components/DamageReceiverComponent.gd" id="5"]
+[ext_resource type="Script" path="res://core/entity/components/StateMachine.gd" id="6"]
+[ext_resource type="Script" path="res://core/entity/components/states/IdleState.gd" id="7"]
+[ext_resource type="Script" path="res://core/entity/components/states/MoveState.gd" id="8"]
+[ext_resource type="Script" path="res://core/entity/components/states/ChaseState.gd" id="9"]
+[ext_resource type="Script" path="res://core/entity/components/states/FleeState.gd" id="10"]
+
+[node name="Entity" type="CharacterBody2D"]
+script = ExtResource("1")
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="StatsComponent" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("4")
+
+[node name="DamageReceiverComponent" type="Node" parent="."]
+script = ExtResource("5")
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("6")
+
+[node name="IdleState" type="Node" parent="StateMachine"]
+script = ExtResource("7")
+
+[node name="MoveState" type="Node" parent="StateMachine"]
+script = ExtResource("8")
+
+[node name="ChaseState" type="Node" parent="StateMachine"]
+script = ExtResource("9")
+
+[node name="FleeState" type="Node" parent="StateMachine"]
+script = ExtResource("10")

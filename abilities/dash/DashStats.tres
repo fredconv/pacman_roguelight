@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DashStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://abilities/dash/DashStats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+dash_distance = 64.0
+dash_duration = 0.12
+cooldown_seconds = 1.5
+resource_local_to_scene = true

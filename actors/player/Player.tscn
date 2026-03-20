@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://core/entity/Entity.tscn" id="1"]
+[ext_resource type="Script" path="res://actors/player/Player.gd" id="2"]
+[ext_resource type="Script" path="res://abilities/dash/DashComponent.gd" id="3"]
+[ext_resource type="Script" path="res://abilities/shoot/ShootComponent.gd" id="4"]
+
+[node name="Player" instance=ExtResource("1")]
+script = ExtResource("2")
+
+[node name="DashComponent" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="ShootComponent" type="Node" parent="."]
+script = ExtResource("4")

@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PickupStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://gameplay/pickups/PickupStats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+speed_bonus = 0.0
+dash_bonus = 0.15
+resource_local_to_scene = true
