@@ -1,11 +1,8 @@
-[gd_resource type="Resource" script_class="EntityStats" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EntityStats" format=3 uid="uid://dwcf14v3q6g6m"]
 
-[ext_resource type="Script" path="res://resources/stats/EntityStats.gd" id="1"]
+[ext_resource type="Script" uid="uid://cg64vp3omnlp0" path="res://resources/stats/EntityStats.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 max_health = 80
 base_speed = 175.0
-base_damage = 10
-armor = 0
-resource_local_to_scene = false

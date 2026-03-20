@@ -1,10 +1,7 @@
-[gd_resource type="Resource" script_class="ShootStats" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ShootStats" format=3 uid="uid://dqlhxtcgjb0nh"]
 
-[ext_resource type="Script" path="res://abilities/shoot/ShootStats.gd" id="1"]
+[ext_resource type="Script" uid="uid://bjttal77ixgud" path="res://abilities/shoot/ShootStats.gd" id="1"]
 
 [resource]
-script = ExtResource("1")
-projectile_speed = 420.0
-projectile_damage = 8
-cooldown_seconds = 0.4
 resource_local_to_scene = true
+script = ExtResource("1")
