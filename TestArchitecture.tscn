@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4n3r8vwn3ywx"]
+
+[ext_resource type="Script" path="res://TestArchitecture.gd" id="1_d8kft"]
+
+[node name="TestArchitecture" type="Node"]
+script = ExtResource("1_d8kft")

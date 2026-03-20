@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://c2vj1h2qp8w2g"]
+
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player"]
+
+[node name="PlayerTestScene" type="Node2D"]
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(400, 300)
+
+[node name="Instructions" type="Label" parent="."]
+offset_right = 800
+offset_bottom = 100
+text = "🎮 TEST DU PLAYER MODULAIRE
+🔹 Utilisez les flèches ou WASD pour bouger
+🔹 Espace pour utiliser une capacité (Blink)
+🔹 Le Player utilise maintenant le système modulaire BaseEntity"

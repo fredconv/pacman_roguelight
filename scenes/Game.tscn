@@ -1,0 +1,121 @@
+[gd_scene load_steps=7 format=3 uid="uid://bwtgq3jylmcbp"]
+
+[ext_resource type="Script" path="res://scenes/Game.gd" id="1_dgv5u"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_3r4wd"]
+[ext_resource type="Script" path="res://scenes/Maze.gd" id="3_h5xry"]
+[ext_resource type="Texture2D" uid="uid://bl52hse76swf7" path="res://sprites/111-1117023_pixel-art-pac-man-png-download-pacman-sprite.png" id="5_q7uqf"]
+[ext_resource type="Script" path="res://scenes/UpgradeScreen.gd" id="6_upgrade"]
+[ext_resource type="Script" path="res://scenes/HUD.gd" id="7_hud"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_h8y4u"]
+radius = 14.0
+
+[sub_resource type="Environment" id="Environment_t1vbg"]
+background_mode = 1
+background_color = Color(0, 0, 0, 1)
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_dgv5u")
+
+[node name="Maze" type="Node2D" parent="."]
+script = ExtResource("3_h5xry")
+
+[node name="Player" parent="." instance=ExtResource("2_3r4wd")]
+position = Vector2(304, 496)
+
+# FANTOMES TEMPORAIREMENT DÉSACTIVÉS
+# [node name="Ghosts" type="Node2D" parent="."]
+
+# [node name="Ghost1" type="CharacterBody2D" parent="Ghosts"]
+# position = Vector2(304, 336)
+# ghost_color = Color(1, 0, 0, 1)
+
+# [node name="Sprite2D" type="Sprite2D" parent="Ghosts/Ghost1"]
+# scale = Vector2(0.19230768, 0.19548872)
+# texture = ExtResource("5_q7uqf")
+# region_enabled = true
+# region_rect = Rect2(65, 234, 65, 66)
+
+# [node name="CollisionShape2D" type="CollisionShape2D" parent="Ghosts/Ghost1"]
+# shape = SubResource("CircleShape2D_h8y4u")
+
+# [node name="Ghost2" type="CharacterBody2D" parent="Ghosts"]
+# position = Vector2(272, 336)
+# ghost_color = Color(1, 0.752941, 0.796078, 1)
+
+# [node name="Sprite2D" type="Sprite2D" parent="Ghosts/Ghost2"]
+# scale = Vector2(0.19230768, 0.19548872)
+# texture = ExtResource("5_q7uqf")
+# region_enabled = true
+# region_rect = Rect2(65, 234, 65, 66)
+
+# [node name="CollisionShape2D" type="CollisionShape2D" parent="Ghosts/Ghost2"]
+# shape = SubResource("CircleShape2D_h8y4u")
+
+# [node name="Ghost3" type="CharacterBody2D" parent="Ghosts"]
+# position = Vector2(336, 336)
+# ghost_color = Color(0, 1, 1, 1)
+
+# [node name="Sprite2D" type="Sprite2D" parent="Ghosts/Ghost3"]
+# scale = Vector2(0.19230768, 0.19548872)
+# texture = ExtResource("5_q7uqf")
+# region_enabled = true
+# region_rect = Rect2(65, 234, 65, 66)
+
+# [node name="CollisionShape2D" type="CollisionShape2D" parent="Ghosts/Ghost3"]
+# shape = SubResource("CircleShape2D_h8y4u")
+
+# [node name="Ghost4" type="CharacterBody2D" parent="Ghosts"]
+# position = Vector2(304, 304)
+# ghost_color = Color(1, 0.647059, 0, 1)
+
+# [node name="Sprite2D" type="Sprite2D" parent="Ghosts/Ghost4"]
+# scale = Vector2(0.19230768, 0.19548872)
+# texture = ExtResource("5_q7uqf")
+# region_enabled = true
+# region_rect = Rect2(65, 234, 65, 66)
+
+# [node name="CollisionShape2D" type="CollisionShape2D" parent="Ghosts/Ghost4"]
+# shape = SubResource("CircleShape2D_h8y4u")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(304, 336)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_t1vbg")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("7_hud")
+
+[node name="ScoreLabel" type="Label" parent="UI/HUD"]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 30.0
+text = "Score: 0"
+
+[node name="LivesLabel" type="Label" parent="UI/HUD"]
+layout_mode = 0
+offset_top = 30.0
+offset_right = 100.0
+offset_bottom = 60.0
+text = "Lives: 3"
+
+[node name="LevelLabel" type="Label" parent="UI/HUD"]
+layout_mode = 0
+offset_top = 60.0
+offset_right = 100.0
+offset_bottom = 90.0
+text = "Level: 1"
+
+[node name="UpgradeScreen" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("6_upgrade")

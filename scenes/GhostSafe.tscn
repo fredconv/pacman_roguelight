@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3 uid="uid://bt7k4xjv8b5n5"]
+
+[ext_resource type="Script" path="res://scenes/SimpleGhostSafe.gd" id="1_ghost_safe"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ghost_safe"]
+radius = 12.0
+
+[node name="SimpleGhostSafe" type="CharacterBody2D"]
+script = ExtResource("1_ghost_safe")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+color = Color(1, 0.5, 0.8, 1)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -16.0
+offset_top = -8.0
+offset_right = 16.0
+offset_bottom = 8.0
+text = "👻"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ghost_safe")
