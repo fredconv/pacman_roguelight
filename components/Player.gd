@@ -441,8 +441,15 @@ func start_default_animation():
 	"""Start default animation"""
 	var sprite = get_node_or_null("AnimatedSprite2D")
 	if sprite and sprite.has_method("play"):
-		sprite.play("idle")
-		print("🎬 Animation 'idle' started")
+		var sprite_frames = sprite.sprite_frames
+		if sprite_frames and sprite_frames.has_animation("default"):
+			sprite.play("default")
+			print("🎬 Animation 'default' started")
+		elif sprite_frames and sprite_frames.has_animation("idle"):
+			sprite.play("idle")
+			print("🎬 Animation 'idle' started")
+		else:
+			print("⚠️ No compatible startup animation found on AnimatedSprite2D")
 	else:
 		print("⚠️ No AnimatedSprite2D found for animation")
 
