@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://abilities/AbilityData.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://abilities/components/DestructiveShotAbility.tscn" id="2_scene"]
+[ext_resource type="Script" path="res://abilities/AbilityStats.gd" id="3_stats"]
+
+[sub_resource type="Resource" id="1"]
+script = ExtResource("3_stats")
+stun_seconds = 1.0
+
+[resource]
+script = ExtResource("1_data")
+id = &"destructive_shot"
+name = "Tir destructeur"
+description = "Preparation du niveau 2 de tir destructeur (spawn + stun 1s)."
+level = 2
+max_level = 3
+component_scene = ExtResource("2_scene")
+stats = SubResource("1")

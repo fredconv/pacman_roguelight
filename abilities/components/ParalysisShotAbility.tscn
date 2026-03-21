@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://abilities/components/ParalysisShotAbility.gd" id="1_paralysis"]
+
+[node name="ParalysisShotAbility" type="Node"]
+script = ExtResource("1_paralysis")

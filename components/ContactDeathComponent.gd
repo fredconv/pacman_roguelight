@@ -14,8 +14,8 @@ signal defeated_other(killer: Node, victim: Node)
 var owner_node: Node2D
 var state_machine: Node
 
-func setup(owner: Node2D, machine: Node, assigned_team: Team) -> void:
-	owner_node = owner
+func setup(entity_owner: Node2D, machine: Node, assigned_team: Team) -> void:
+	owner_node = entity_owner
 	state_machine = machine
 	team = assigned_team
 
@@ -67,7 +67,7 @@ func has_physical_overlap(a: Node2D, b: Node2D) -> bool:
 			return true
 	return false
 
-func can_defeat(other: Node) -> bool:
+func can_defeat(_other: Node) -> bool:
 	if team == Team.PLAYER:
 		# Player defeats ghost only when powered (e.g. super gem / power pellet)
 		return state_machine != null and state_machine.has_method("is_state") and state_machine.is_state(&"powered")

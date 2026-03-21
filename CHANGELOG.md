@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-21
+
+### Added
+
+- Modular abilities runtime with `AbilityManager`, `AbilityData`, and level-based `.tres` resources.
+- Random 3-choice upgrade flow shown when the player loses the last available life.
+- First scalable ability set with 3 upgrade levels each: `ExtraLife`, `Dash`, and `SpeedBoost`.
+- Scaffolding resources/scenes for `Invisibility`, `ParalysisShot`, `DestructiveShot`, and `Mines` including `Mine.tscn`.
+- Player integration for persistent lives bonus, dash movement over grid cells, and respawn with chosen ability.
+
 ## [0.1.0] - 2026-03-20
 
 ### Added

@@ -4,6 +4,7 @@ class_name Player
 # === PLAYER SPECIFIC PROPERTIES ===
 @export var score: int = 0
 @export var lives: int = 1
+@export var base_lives: int = 1
 
 # === PLAYER STATUS ===
 enum PlayerStatus {
@@ -50,10 +51,14 @@ var spawn_position: Vector2
 signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
 signal player_caught
+signal life_lost(remaining_lives: int)
 
 var state_machine_component: Node
 var contact_death_component: Node
 var _death_emitted: bool = false
+var extra_lives_bonus: int = 0
+var speed_bonus_multiplier: float = 0.0
+var base_move_speed: float = GameConstants.PLAYER_SPEED
 
 func _ready():
 	# Setup BaseEntity first
@@ -64,6 +69,7 @@ func _ready():
 	current_mana = 50
 	max_speed = GameConstants.PLAYER_SPEED
 	current_speed = GameConstants.PLAYER_SPEED
+	base_move_speed = GameConstants.PLAYER_SPEED
 
 	# Call parent _ready
 	super._ready()
@@ -73,9 +79,6 @@ func _ready():
 	# Setup player-specific stuff
 	setup_player_specifics()
 	setup_combat_components()
-
-	# Load abilities
-	load_player_abilities()
 
 	# Emit initial values
 	score_changed.emit(score)
@@ -105,12 +108,6 @@ func setup_player_specifics():
 	# Setup sprite
 	debug_sprite()
 	start_default_animation()
-
-func load_player_abilities():
-	"""Load player abilities"""
-	if ability_component:
-		ability_component.load_ability("blink")
-		print("⚡ Player abilities loaded")
 
 func setup_combat_components():
 	"""Setup reusable state/death components for contact combat."""
@@ -241,9 +238,8 @@ func _unhandled_input(event):
 	elif event.is_action_pressed("move_right"):
 		target_direction = DIRECTIONS.right
 
-	# Ability input
-	if event.is_action_pressed("ability_blink"):
-		use_ability("blink")
+	if event.is_action_pressed("dash") and ability_component and ability_component.has_method("activate_input_action"):
+		ability_component.activate_input_action(&"dash")
 
 # === MOVEMENT SYSTEM ===
 func _physics_process(delta: float):
@@ -425,12 +421,49 @@ func lose_life():
 	lives = maxi(0, lives - 1)
 	lives_changed.emit(lives)
 	print("💔 Lives remaining: ", lives)
+	life_lost.emit(lives)
 
 func get_score() -> int:
 	return score
 
 func get_lives() -> int:
 	return lives
+
+func get_max_lives() -> int:
+	return base_lives + extra_lives_bonus
+
+func reset_lives_to_max() -> void:
+	lives = get_max_lives()
+	lives_changed.emit(lives)
+
+func add_extra_lives(amount: int) -> void:
+	extra_lives_bonus = maxi(0, extra_lives_bonus + amount)
+	reset_lives_to_max()
+
+func set_speed_bonus_multiplier(multiplier: float) -> void:
+	speed_bonus_multiplier = maxf(0.0, multiplier)
+	current_speed = base_move_speed * (1.0 + speed_bonus_multiplier)
+	max_speed = current_speed
+
+func get_ability_component() -> Node:
+	return ability_component
+
+func dash_forward(cell_count: int) -> bool:
+	var dash_direction := current_direction if current_direction != Vector2.ZERO else target_direction
+	if dash_direction == Vector2.ZERO:
+		return false
+	var start_position := global_position
+	global_position = get_nearest_grid_center()
+	var destination := global_position
+	for _step in range(cell_count):
+		if is_direction_blocked(dash_direction):
+			break
+		destination += dash_direction * TILE_SIZE
+		global_position = destination
+	velocity = Vector2.ZERO
+	update_raycast_directions(dash_direction)
+	update_animation(dash_direction)
+	return destination.distance_to(start_position) > 0.0
 
 # === SPRITE SYSTEM (copied from original) ===
 var debug_timer = 0.0
@@ -519,7 +552,11 @@ func _on_entity_died(_entity):
 
 func _on_defeated_by_contact(_victim: Node, _killer: Node):
 	lose_life()
-	defeat()
+	if lives <= 0:
+		defeat()
+	else:
+		var respawn_position := spawn_position if spawn_position != Vector2.ZERO else global_position
+		revive_at(respawn_position)
 
 func get_contact_death_component() -> Node:
 	return contact_death_component
@@ -552,6 +589,7 @@ func revive_at(spawn_pos: Vector2) -> void:
 	velocity = Vector2.ZERO
 	current_direction = DIRECTIONS.right
 	target_direction = DIRECTIONS.right
+	spawn_position = spawn_pos
 	deactivate_hunter_mode()
 	if state_machine_component and state_machine_component.has_method("set_state"):
 		state_machine_component.set_state(&"normal")

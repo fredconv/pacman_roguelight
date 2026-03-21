@@ -10,6 +10,8 @@ signal game_over
 
 var lives: int = 1
 var game_active: bool = true
+var upgrade_screen: UpgradeScreen
+var upgrade_layer: CanvasLayer
 
 func _ready():
 	print("\n=== GAME._READY APPELÉ ===")
@@ -49,6 +51,7 @@ func _ready():
 	if maze and player:
 		var spawn_pos = maze.get_spawn_position()
 		player.global_position = spawn_pos
+		player.spawn_position = spawn_pos
 		print("👤 Joueur positionné à: ", spawn_pos)
 
 		# Connecter les signaux de collecte
@@ -57,6 +60,9 @@ func _ready():
 
 	# Spawner un fantôme de test
 	spawn_ghost()
+	setup_upgrade_screen()
+	if AbilityManager and AbilityManager.has_method("is_run_initialized") and not AbilityManager.is_run_initialized():
+		AbilityManager.reset_run()
 
 func setup_responsive_layout():
 	# === STRUCTURE RESPONSIVE COMPLÈTE ===
@@ -140,17 +146,8 @@ func _process(_delta):
 		elif Input.is_action_just_pressed("ui_cancel"):
 			print("🎮 ÉCHAP détecté via _process - fermeture jeu")
 			get_tree().quit()
-	elif not game_active and has_node("DefeatScreen"):
-		if Input.is_action_just_pressed("dash"):
-			print("🎮 ESPACE détecté - recommencer le niveau")
-			call_deferred("restart_current_level")
-		elif Input.is_action_just_pressed("ui_cancel"):
-			print("🎮 ÉCHAP détecté - retour menu")
-			var scene_manager = get_node_or_null("/root/SceneManager")
-			if scene_manager and scene_manager.has_method("return_to_menu"):
-				scene_manager.return_to_menu()
-			else:
-				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+	elif not game_active and upgrade_screen and upgrade_screen.visible:
+		return
 
 func _physics_process(_delta: float) -> void:
 	if not game_active:
@@ -314,15 +311,8 @@ func _input(event):
 			print("🎮 ÉCHAP pressé - fermeture jeu")
 			get_tree().quit()
 
-	if not game_active and has_node("DefeatScreen"):
-		if event.is_action_pressed("dash"):
-			call_deferred("restart_current_level")
-		elif event.is_action_pressed("ui_cancel"):
-			var scene_manager = get_node_or_null("/root/SceneManager")
-			if scene_manager and scene_manager.has_method("return_to_menu"):
-				scene_manager.return_to_menu()
-			else:
-				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+	if not game_active and upgrade_screen and upgrade_screen.visible:
+		return
 
 	# Raccourci pour activer/désactiver le mode debug (F1)
 	if event is InputEventKey and event.pressed:
@@ -340,15 +330,8 @@ func _unhandled_input(event):
 			print("🎮 ÉCHAP détecté (unhandled) - fermeture jeu")
 			get_tree().quit()
 
-	if not game_active and has_node("DefeatScreen"):
-		if Input.is_action_just_pressed("dash"):
-			call_deferred("restart_current_level")
-		elif Input.is_action_just_pressed("ui_cancel"):
-			var scene_manager = get_node_or_null("/root/SceneManager")
-			if scene_manager and scene_manager.has_method("return_to_menu"):
-				scene_manager.return_to_menu()
-			else:
-				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+	if not game_active and upgrade_screen and upgrade_screen.visible:
+		return
 
 func trigger_player_defeat() -> void:
 	if not game_active:
@@ -357,7 +340,47 @@ func trigger_player_defeat() -> void:
 	game_active = false
 	if GameManager and GameManager.has_method("on_player_died"):
 		GameManager.on_player_died()
-	show_defeat_screen()
+	show_upgrade_selection()
+
+func setup_upgrade_screen() -> void:
+	if upgrade_screen != null:
+		return
+	if upgrade_layer == null:
+		upgrade_layer = CanvasLayer.new()
+		upgrade_layer.name = "UpgradeLayer"
+		upgrade_layer.layer = 200
+		add_child(upgrade_layer)
+	var upgrade_script = load("res://scenes/ui/UpgradeScreen.gd")
+	upgrade_screen = upgrade_script.new()
+	upgrade_screen.name = "UpgradeScreen"
+	upgrade_screen.process_mode = Node.PROCESS_MODE_ALWAYS
+	upgrade_layer.add_child(upgrade_screen)
+	upgrade_screen.ability_selected.connect(_on_upgrade_ability_selected)
+	upgrade_screen.menu_requested.connect(_on_upgrade_menu_requested)
+
+func show_upgrade_selection() -> void:
+	if AbilityManager == null or not AbilityManager.has_method("draw_choices"):
+		show_defeat_screen()
+		return
+	var choices: Array[AbilityData] = AbilityManager.draw_choices(3)
+	if choices.is_empty():
+		show_defeat_screen()
+		return
+	if upgrade_screen == null:
+		setup_upgrade_screen()
+	upgrade_screen.show_choices(choices)
+
+func _on_upgrade_ability_selected(ability_data: AbilityData) -> void:
+	if AbilityManager and AbilityManager.has_method("apply_choice") and player:
+		AbilityManager.apply_choice(player, ability_data)
+	if upgrade_screen:
+		upgrade_screen.hide_screen()
+	restart_current_level()
+
+func _on_upgrade_menu_requested() -> void:
+	if upgrade_screen:
+		upgrade_screen.hide_screen()
+	_load_main_menu()
 
 func show_defeat_screen() -> void:
 	if has_node("DefeatScreen"):
@@ -397,8 +420,7 @@ func restart_current_level() -> void:
 		get_node("DefeatScreen").queue_free()
 	game_active = true
 	if player:
-		player.lives = 1
-		player.lives_changed.emit(player.lives)
+		player.reset_lives_to_max()
 	reset_level_state(current_level)
 	if maze and player and player.has_method("revive_at"):
 		player.revive_at(maze.get_spawn_position())
@@ -701,6 +723,7 @@ func reposition_player():
 	"""Repositionner le joueur au spawn du maze"""
 	if maze and player:
 		var spawn_pos = maze.get_spawn_position()
+		player.spawn_position = spawn_pos
 		player.global_position = spawn_pos
 		print("👤 Joueur repositionné à: ", spawn_pos)
 	else:
@@ -742,7 +765,7 @@ func reset_player_stats():
 	"""Réinitialiser les statistiques du joueur"""
 	if player:
 		player.score = 0
-		player.lives = 3
+		player.reset_lives_to_max()
 		player.score_changed.emit(player.score)
 		player.lives_changed.emit(player.lives)
 		print("✅ Stats joueur réinitialisées")
@@ -794,11 +817,10 @@ func spawn_ghost():
 		create_simple_ghost()
 		return
 
-	# Positionner le fantôme
-	position_ghost(ghost)
-
-	# Ajouter le fantôme dans la hiérarchie
+	# Ajouter le fantôme dans la hiérarchie d'abord, puis le positionner.
+	# Cela évite les décalages de transform quand le parent est un Control centré.
 	add_ghost_to_scene(ghost)
+	position_ghost(ghost)
 
 func create_simple_ghost():
 	"""Créer un fantôme simple sans dépendances externes"""
@@ -826,23 +848,49 @@ func create_simple_ghost():
 	ghost.collision_mask = 1
 	ghost.add_to_group("ghosts")
 
-	# Positionner et ajouter
-	position_ghost(ghost)
+	# Ajouter puis positionner pour garantir des coordonnées cohérentes.
 	add_ghost_to_scene(ghost)
+	position_ghost(ghost)
 
 func position_ghost(ghost: Node2D):
 	"""Positionner un fantôme"""
-	if maze:
-		var ghost_spawns = maze.get_ghost_spawn_positions()
+	if ghost == null:
+		return
+	if maze and maze.has_method("get_ghost_spawn_positions"):
+		var ghost_spawns: Array = maze.get_ghost_spawn_positions()
 		if ghost_spawns.size() > 0:
-			ghost.global_position = ghost_spawns[0]
-			print("👻 Fantôme positionné à: ", ghost_spawns[0])
-		else:
-			ghost.global_position = Vector2(300, 300)
-			print("👻 Fantôme positionné par défaut à: ", Vector2(300, 300))
-	else:
-		ghost.global_position = Vector2(400, 300)
-		print("👻 Fantôme positionné sans maze à: ", Vector2(400, 300))
+			for spawn_pos in ghost_spawns:
+				ghost.global_position = spawn_pos
+				if is_spawn_position_valid(ghost):
+					print("👻 Fantôme positionné à: ", spawn_pos)
+					return
+			print("⚠️ Aucun spawn valide trouvé dans la liste - fallback")
+
+	# Fallback: position sûre approximative puis validation
+	var fallback_pos := Vector2(400, 300)
+	if maze and maze.has_method("get_spawn_position"):
+		fallback_pos = maze.get_spawn_position() + Vector2(64, 0)
+	ghost.global_position = fallback_pos
+	print("👻 Fantôme positionné en fallback à: ", fallback_pos)
+
+func is_spawn_position_valid(ghost: Node2D) -> bool:
+	var collision = ghost.get_node_or_null("CollisionShape2D")
+	if collision == null or collision.shape == null:
+		return true
+
+	var shape: Shape2D = collision.shape
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = shape
+	query.transform = (collision as Node2D).global_transform
+	query.exclude = [ghost.get_rid()]
+
+	var space_state := ghost.get_world_2d().direct_space_state
+	var hits: Array[Dictionary] = space_state.intersect_shape(query, 16)
+	for hit in hits:
+		var collider = hit.get("collider")
+		if collider is StaticBody2D:
+			return false
+	return true
 
 func add_ghost_to_scene(ghost: Node2D):
 	"""Ajouter un fantôme à la scène avec gestion d'erreur"""

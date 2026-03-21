@@ -38,6 +38,7 @@ func take_damage(amount: int, source: Node = null):
 
 	# Check for death
 	if entity.current_health <= 0:
+		entity.current_health = 0
 		die()
 
 func heal(amount: int):

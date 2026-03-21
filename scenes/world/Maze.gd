@@ -300,12 +300,10 @@ func get_ghost_spawn_positions() -> Array:
 	for row in range(maze_data.size()):
 		for col in range(maze_data[row].size()):
 			if maze_data[row][col] == CellType.GHOST_SPAWN:
-				# Calculer position exactement comme le joueur calcule le centre de grille
-				var spawn_x = float(col * cell_size) + float(cell_size) / 2.0
-				var spawn_y = float(row * cell_size) + float(cell_size) / 2.0
-				var spawn_pos = Vector2(spawn_x, spawn_y)
-				positions.append(spawn_pos)
-				print("Ghost spawn créé à: ", spawn_pos, " (grille: ", col, ",", row, ")")
+				if is_walkable_cell(col, row):
+					var spawn_pos = grid_to_global_position(col, row)
+					positions.append(spawn_pos)
+					print("Ghost spawn créé à: ", spawn_pos, " (grille: ", col, ",", row, ")")
 
 	# If no specific spawn points, create some around the center avec alignement parfait
 	if positions.is_empty():
@@ -318,11 +316,22 @@ func get_ghost_spawn_positions() -> Array:
 		for offset in spawn_offsets:
 			var col = center_col + int(offset.x)
 			var row = center_row + int(offset.y)
-			var spawn_x = float(col * cell_size) + float(cell_size) / 2.0
-			var spawn_y = float(row * cell_size) + float(cell_size) / 2.0
-			positions.append(Vector2(spawn_x, spawn_y))
+			if is_walkable_cell(col, row):
+				positions.append(grid_to_global_position(col, row))
 
 	return positions
+
+func grid_to_global_position(col: int, row: int) -> Vector2:
+	var local_pos = Vector2(float(col * cell_size) + float(cell_size) * 0.5, float(row * cell_size) + float(cell_size) * 0.5)
+	return global_position + local_pos
+
+func is_walkable_cell(col: int, row: int) -> bool:
+	if row < 0 or row >= maze_data.size():
+		return false
+	if col < 0 or col >= maze_data[row].size():
+		return false
+	var cell = maze_data[row][col]
+	return cell != CellType.WALL
 
 func _on_specific_dot_collected(dot):
 	# Supprimer le dot de la liste

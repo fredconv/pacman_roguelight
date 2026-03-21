@@ -56,3 +56,23 @@
 - [x] Ensure all abilities are modular components
 - [x] Externalize stats into `.tres` resources
 - [x] Organize folders toward target structure
+
+## Abilities System
+
+- [x] Create `AbilityData.gd`
+- [x] Rework entity `AbilityComponent.gd` as installed-abilities container
+- [x] Create `AbilityManager.gd` autoload
+- [x] Create folders `abilities/components` and `abilities/ability_list`
+- [x] Implement dynamic pool with random draw of 3 choices
+- [x] Remove chosen ability from pool and enqueue next level
+- [x] Add `ExtraLife` levels 1-3
+- [x] Add `Dash` levels 1-3
+- [x] Add `SpeedBoost` levels 1-3
+- [x] Add `Invisibility` levels 1-3 scaffold
+- [x] Add `ParalysisShot` levels 1-3 scaffold
+- [x] Add `DestructiveShot` levels 1-3 scaffold
+- [x] Add `Mines` levels 1-3 scaffold with `Mine.tscn`
+- [x] Add upgrade UI with 3 random choices
+- [x] Integrate ability choice after player death
+- [x] Apply chosen ability to player on respawn
+- [x] Keep system ready to add more abilities later

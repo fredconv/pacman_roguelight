@@ -6,6 +6,8 @@ extends Control
 
 func _ready():
 	print("🏠 Menu principal chargé")
+	if AbilityManager and AbilityManager.has_method("reset_run"):
+		AbilityManager.reset_run()
 	# Récupérer le SceneManager depuis l'autoload
 	scene_manager = get_node("/root/SceneManager") if get_node_or_null("/root/SceneManager") else null
 
