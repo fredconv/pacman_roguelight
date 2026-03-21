@@ -5,6 +5,7 @@ class_name SimpleGhost
 
 # Configuration
 @export var speed: float = GameConstants.GHOST_SPEED
+@export var health_stats: HealthStats
 
 # Variables de mouvement
 var move_direction: Vector2 = Vector2.UP
@@ -16,10 +17,12 @@ var change_interval: float = 2.0  # Change de direction toutes les 2 secondes
 
 var state_machine_component: Node
 var contact_death_component: Node
+var health_component: HealthComponent
 
 func _ready():
 	# Ajouter au groupe des fantômes
 	add_to_group("ghosts")
+	setup_health_component()
 	setup_combat_components()
 
 	# Configurer les layers de collision
@@ -28,6 +31,39 @@ func _ready():
 
 	# Choisir une direction initiale aléatoire
 	move_direction = possible_directions[randi() % possible_directions.size()]
+
+func setup_health_component() -> void:
+	if has_node("HealthComponent"):
+		health_component = $HealthComponent
+	else:
+		var health_scene = load("res://components/HealthComponent.tscn")
+		health_component = health_scene.instantiate() if health_scene is PackedScene else null
+		if health_component == null:
+			var health_script = load("res://components/HealthComponent.gd")
+			health_component = health_script.new()
+		health_component.name = "HealthComponent"
+		add_child(health_component)
+
+	if health_component and health_component.has_method("setup"):
+		health_component.setup(self, health_stats)
+		if not health_component.entity_died.is_connected(_on_health_component_died):
+			health_component.entity_died.connect(_on_health_component_died)
+
+func _on_health_component_died(_entity: Node) -> void:
+	queue_free()
+
+func take_damage(amount: int, source: Node = null) -> void:
+	if health_component and health_component.has_method("take_damage"):
+		health_component.take_damage(amount, source)
+
+func heal(amount: int) -> void:
+	if health_component and health_component.has_method("heal"):
+		health_component.heal(amount)
+
+func is_alive() -> bool:
+	if health_component and health_component.has_method("is_alive"):
+		return health_component.is_alive()
+	return true
 
 func setup_combat_components() -> void:
 	if not has_node("StateMachineComponent"):

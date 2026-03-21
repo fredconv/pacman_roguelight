@@ -30,10 +30,14 @@ func _configure_stats(stats: HealthStats = null) -> void:
 	if stats != null:
 		health_stats = stats
 	if health_stats == null:
-		health_stats = HealthStats.new()
-		health_stats.max_health = int(entity.get("max_health")) if entity != null else 100
-		health_stats.base_armor = int(entity.get("armor")) if entity != null else 0
-		health_stats.regen_per_second = float(entity.get("health_regen")) if entity != null else 0.0
+		var default_stats_resource := load("res://resources/stats/DefaultHealthStats.tres")
+		if default_stats_resource is HealthStats:
+			health_stats = default_stats_resource
+		else:
+			health_stats = HealthStats.new()
+			health_stats.max_health = int(entity.get("max_health")) if entity != null else 100
+			health_stats.base_armor = int(entity.get("armor")) if entity != null else 0
+			health_stats.regen_per_second = float(entity.get("health_regen")) if entity != null else 0.0
 
 	max_health = max(1, health_stats.max_health)
 	armor = max(0, health_stats.base_armor)
@@ -59,6 +63,8 @@ func _sync_entity_health_state() -> void:
 	entity.set("max_health", max_health)
 	entity.set("current_health", current_health)
 	entity.set("armor", armor)
+	if health_stats != null:
+		entity.set("health_regen", int(round(health_stats.regen_per_second)))
 
 # ===== DAMAGE SYSTEM =====
 func take_damage(amount: int, source: Node = null):

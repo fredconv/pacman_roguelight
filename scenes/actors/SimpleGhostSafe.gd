@@ -5,6 +5,7 @@ class_name SimpleGhostSafe
 
 # Configuration basique
 @export var speed: float = 100.0
+@export var health_stats: HealthStats
 
 # Grid system (comme le player)
 const TILE_SIZE = 32  # GameConstants.CELL_SIZE
@@ -27,12 +28,14 @@ var change_interval: float = 2.0
 
 var state_machine_component: Node
 var contact_death_component: Node
+var health_component: HealthComponent
 
 func _ready():
 	print("👻 SimpleGhost initialisé")
 
 	# Ajouter au groupe des fantômes
 	add_to_group("ghosts")
+	setup_health_component()
 	setup_combat_components()
 
 	# Configurer les layers de collision
@@ -50,6 +53,39 @@ func _ready():
 	move_direction = possible_directions[randi() % possible_directions.size()]
 	target_direction = move_direction
 	print("👻 Direction initiale: ", move_direction)
+
+func setup_health_component() -> void:
+	if has_node("HealthComponent"):
+		health_component = $HealthComponent
+	else:
+		var health_scene = load("res://components/HealthComponent.tscn")
+		health_component = health_scene.instantiate() if health_scene is PackedScene else null
+		if health_component == null:
+			var health_script = load("res://components/HealthComponent.gd")
+			health_component = health_script.new()
+		health_component.name = "HealthComponent"
+		add_child(health_component)
+
+	if health_component and health_component.has_method("setup"):
+		health_component.setup(self, health_stats)
+		if not health_component.entity_died.is_connected(_on_health_component_died):
+			health_component.entity_died.connect(_on_health_component_died)
+
+func _on_health_component_died(_entity: Node) -> void:
+	queue_free()
+
+func take_damage(amount: int, source: Node = null) -> void:
+	if health_component and health_component.has_method("take_damage"):
+		health_component.take_damage(amount, source)
+
+func heal(amount: int) -> void:
+	if health_component and health_component.has_method("heal"):
+		health_component.heal(amount)
+
+func is_alive() -> bool:
+	if health_component and health_component.has_method("is_alive"):
+		return health_component.is_alive()
+	return true
 
 func setup_combat_components() -> void:
 	if not has_node("StateMachineComponent"):
