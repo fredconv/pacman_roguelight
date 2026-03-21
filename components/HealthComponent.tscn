@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://components/HealthComponent.gd" id="1_health"]
+[ext_resource type="Script" path="res://components/StatusEffectManager.gd" id="2_status"]
+
+[node name="HealthComponent" type="Node"]
+script = ExtResource("1_health")
+
+[node name="StatusEffectManager" type="Node" parent="."]
+script = ExtResource("2_status")

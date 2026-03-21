@@ -9,6 +9,7 @@ class_name BaseEntity
 @export var current_health: int = 100
 @export var health_regen: int = 1
 @export var armor: int = 0
+@export var health_stats: HealthStats
 
 # ===== MANA SYSTEM =====
 @export var max_mana: int = 100
@@ -45,9 +46,13 @@ func _ready():
 func setup_components():
 	"""Initialize and setup all components"""
 	# Create HealthComponent
-	var health_script = load("res://components/HealthComponent.gd")
-	health_component = health_script.new()
-	health_component.setup(self)
+	var health_scene = load("res://components/HealthComponent.tscn")
+	if health_scene and health_scene is PackedScene:
+		health_component = health_scene.instantiate()
+	else:
+		var health_script = load("res://components/HealthComponent.gd")
+		health_component = health_script.new()
+	health_component.setup(self, health_stats)
 	add_child(health_component)
 
 	# Create MovementComponent
@@ -84,6 +89,8 @@ func heal(amount: int):
 
 func is_alive() -> bool:
 	"""Check if entity is alive"""
+	if health_component and health_component.has_method("is_alive"):
+		return health_component.is_alive()
 	return current_health > 0
 
 # ===== MANA FUNCTIONS =====
@@ -127,7 +134,10 @@ func load_ability(ability_name: String):
 # ===== REGENERATION SYSTEM =====
 func _physics_process(delta: float):
 	# Health regeneration
-	if current_health < max_health and health_regen > 0:
+	if health_component and health_component.has_method("get_current_health") and health_component.has_method("get_max_health") and health_component.has_method("heal") and health_regen > 0:
+		if health_component.get_current_health() < health_component.get_max_health():
+			health_component.heal(int(health_regen * delta))
+	elif current_health < max_health and health_regen > 0:
 		heal(int(health_regen * delta))
 
 	# Mana regeneration
@@ -141,6 +151,7 @@ func _physics_process(delta: float):
 # ===== SIGNAL HANDLERS =====
 func _on_health_changed(new_health: int, max_health_val: int):
 	current_health = new_health
+	max_health = max_health_val
 	health_changed.emit(new_health, max_health_val)
 
 func _on_entity_died(_entity: BaseEntity):
