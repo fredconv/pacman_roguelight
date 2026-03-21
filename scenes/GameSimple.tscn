@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bcbl8vya36rt8"]
+
+[ext_resource type="Script" path="res://scenes/Game.gd" id="1_vwv0q"]
+[ext_resource type="Script" path="res://scenes/Maze.gd" id="2_q5qvq"]
+[ext_resource type="PackedScene" uid="uid://dqbphptp813bp" path="res://scenes/Player.tscn" id="3_3fwxh"]
+
+[node name="Game" type="Node2D" unique_id=1310051585]
+script = ExtResource("1_vwv0q")
+
+[node name="Maze" type="Node2D" parent="." unique_id=2002670699]
+script = ExtResource("2_q5qvq")
+
+[node name="Player" parent="." unique_id=1356012727 instance=ExtResource("3_3fwxh")]
+position = Vector2(186, 133)

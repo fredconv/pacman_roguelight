@@ -33,6 +33,7 @@ signal level_completed(level: int)             # Niveau terminé avec succès
 signal player_died()                           # Joueur mort (perte d'une vie)
 signal game_over()                             # Game over définitif
 signal game_won()                              # Tous les niveaux terminés
+signal game_state_changed(new_state: GameState) # Changement d'état global
 
 # ═══ ÉNUMÉRATION DES ÉTATS DE JEU ═══
 enum GameState {
@@ -40,7 +41,8 @@ enum GameState {
 	PLAYING,        # 1 - En train de jouer
 	PAUSED,         # 2 - Jeu en pause
 	GAME_OVER,      # 3 - Game over
-	VICTORY         # 4 - Victoire complète
+	VICTORY,        # 4 - Victoire complète
+	RESTARTING      # 5 - Redémarrage en cours
 }
 
 # ═══ CONFIGURATION DU JEU ═══
@@ -79,7 +81,7 @@ func _ready():
 		print("🔗 Connexion établie avec SceneManager")
 
 	# État initial
-	game_state = GameState.MENU
+	set_game_state(GameState.MENU)
 	print("📊 État initial: MENU")
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -108,7 +110,7 @@ func start_new_game():
 						 Time.get_time_dict_from_system().second
 
 	# ═══ CHANGEMENT D'ÉTAT ═══
-	game_state = GameState.PLAYING
+	set_game_state(GameState.PLAYING)
 
 	print("📊 Données initialisées - Score:", player_score, "Vies:", player_lives, "Niveau:", current_level)
 
@@ -223,7 +225,7 @@ func trigger_game_over():
 	print("📊 Score final:", player_score, "Niveau atteint:", current_level)
 	print("   Niveaux complétés:", levels_completed, "Morts totales:", total_deaths)
 
-	game_state = GameState.GAME_OVER
+	set_game_state(GameState.GAME_OVER)
 	game_over.emit()
 
 	print("🏠 Retour au menu dans 3 secondes...")
@@ -239,7 +241,7 @@ func trigger_game_won():
 	print("🎁 Bonus de victoire: +", victory_bonus, " (vies restantes)")
 	add_score(victory_bonus)
 
-	game_state = GameState.VICTORY
+	set_game_state(GameState.VICTORY)
 	game_won.emit()
 
 	print("🏠 Retour au menu dans 5 secondes...")
@@ -249,22 +251,52 @@ func trigger_game_won():
 func pause_game():
 	"""MISE EN PAUSE DU JEU"""
 	if game_state == GameState.PLAYING:
-		game_state = GameState.PAUSED
-		get_tree().paused = true
+		set_game_state(GameState.PAUSED)
 		print("⏸️ Jeu mis en pause")
 
 func resume_game():
 	"""REPRISE DU JEU"""
 	if game_state == GameState.PAUSED:
-		game_state = GameState.PLAYING
-		get_tree().paused = false
+		set_game_state(GameState.PLAYING)
 		print("▶️ Jeu repris")
 
 func return_to_menu():
 	"""RETOUR AU MENU PRINCIPAL"""
 	print("🏠 Retour au menu principal")
-	game_state = GameState.MENU
+	set_game_state(GameState.MENU)
 	SceneManager.goto_main_menu()
+
+func set_game_state(new_state: GameState) -> void:
+	"""Définit l'état global et applique ses effets runtime."""
+	if game_state == new_state:
+		return
+	game_state = new_state
+	_apply_runtime_state(new_state)
+	game_state_changed.emit(new_state)
+	print("📊 État de jeu -> ", get_game_state_name(new_state))
+
+func start_playing() -> void:
+	set_game_state(GameState.PLAYING)
+
+func on_player_died() -> void:
+	set_game_state(GameState.GAME_OVER)
+
+func begin_restart() -> void:
+	set_game_state(GameState.RESTARTING)
+
+func finish_restart() -> void:
+	set_game_state(GameState.PLAYING)
+
+func get_game_state_name(state: GameState = game_state) -> String:
+	return GameState.keys()[state]
+
+func _apply_runtime_state(state: GameState) -> void:
+	# On gèle le gameplay via time_scale pour garder l'UI/input disponibles.
+	match state:
+		GameState.PLAYING, GameState.MENU:
+			Engine.time_scale = 1.0
+		GameState.PAUSED, GameState.GAME_OVER, GameState.VICTORY, GameState.RESTARTING:
+			Engine.time_scale = 0.0
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # GETTERS D'ÉTAT
@@ -296,9 +328,9 @@ func _on_scene_changed(scene_name: String):
 
 	if scene_name == "MAIN_MENU":
 		if game_state != GameState.MENU:
-			game_state = GameState.MENU
+			set_game_state(GameState.MENU)
 			print("📊 État mis à jour: MENU")
 	elif scene_name == "GAME_LEVEL":
 		if game_state == GameState.MENU:
 			print("📊 Passage automatique en mode PLAYING")
-			game_state = GameState.PLAYING
+			set_game_state(GameState.PLAYING)

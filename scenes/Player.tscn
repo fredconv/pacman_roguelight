@@ -1,0 +1,104 @@
+[gd_scene format=3 uid="uid://dqbphptp813bp"]
+
+[ext_resource type="Script" uid="uid://cjx2trtubj8xh" path="res://components/Player.gd" id="1_modular"]
+[ext_resource type="Texture2D" uid="uid://dn5n35q1uw6no" path="res://Assets/Pacman/Pacman_03.png" id="2_sprite"]
+[ext_resource type="Texture2D" uid="uid://bh35fl0wqe63" path="res://Assets/Pacman/Pacman_01.png" id="3_frame1"]
+[ext_resource type="Texture2D" uid="uid://bbgj23q7gam4f" path="res://Assets/Pacman/Pacman_Death_01.png" id="4_death1"]
+[ext_resource type="Texture2D" uid="uid://h71ud3s8c8n3" path="res://Assets/Pacman/Pacman_02.png" id="5_frame2"]
+[ext_resource type="Texture2D" uid="uid://vxf8adm234y3" path="res://Assets/Pacman/Pacman_Death_02.png" id="6_death2"]
+[ext_resource type="Texture2D" uid="uid://coy4joj7785kn" path="res://Assets/Pacman/Pacman_Death_03.png" id="7_death3"]
+[ext_resource type="Texture2D" uid="uid://dc32pr4l0exr7" path="res://Assets/Pacman/Pacman_Death_04.png" id="8_death4"]
+[ext_resource type="Texture2D" uid="uid://bghyra350hdga" path="res://Assets/Pacman/Pacman_Death_05.png" id="9_death5"]
+[ext_resource type="Texture2D" uid="uid://bs55ta550rsj3" path="res://Assets/Pacman/Pacman_Death_06.png" id="10_death6"]
+[ext_resource type="Texture2D" uid="uid://c3dh7n3hysm7o" path="res://Assets/Pacman/Pacman_Death_07.png" id="11_death7"]
+[ext_resource type="Texture2D" uid="uid://d30tk7uppyp8r" path="res://Assets/Pacman/Pacman_Death_08.png" id="12_death8"]
+[ext_resource type="Texture2D" uid="uid://bm2447s8rp6kl" path="res://Assets/Pacman/Pacman_Death_09.png" id="13_death9"]
+[ext_resource type="Texture2D" uid="uid://malqtxrid8h4" path="res://Assets/Pacman/Pacman_Death_10.png" id="14_death10"]
+[ext_resource type="Texture2D" uid="uid://2xj6ip5thdc6" path="res://Assets/Pacman/Pacman_Death_11.png" id="15_death11"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_modular"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_death1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_death2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_death3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_death4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_death5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_death6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_death7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_death8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_death9")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_death10")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_death11")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_frame1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_sprite")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_frame2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_sprite")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_modular"]
+radius = 24.0
+height = 48.0
+
+[node name="Player" type="CharacterBody2D" unique_id=1910250862]
+collision_layer = 2
+collision_mask = 14
+script = ExtResource("1_modular")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1289955103]
+sprite_frames = SubResource("SpriteFrames_modular")
+autoplay = "default"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2140628863]
+scale = Vector2(0.8, 0.8)
+shape = SubResource("CapsuleShape2D_modular")
+
+[node name="RayCast2D_Right" type="RayCast2D" parent="." unique_id=1897206445]
+target_position = Vector2(24, 0)
+
+[node name="RayCast2D_Left" type="RayCast2D" parent="." unique_id=281931175]
+target_position = Vector2(-24, 0)
+
+[node name="RayCast2D_Up" type="RayCast2D" parent="." unique_id=397112057]
+target_position = Vector2(0, -24)
+
+[node name="RayCast2D_Down" type="RayCast2D" parent="." unique_id=870720433]
+target_position = Vector2(0, 24)

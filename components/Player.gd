@@ -3,7 +3,7 @@ class_name Player
 
 # === PLAYER SPECIFIC PROPERTIES ===
 @export var score: int = 0
-@export var lives: int = 3
+@export var lives: int = 1
 
 # === PLAYER STATUS ===
 enum PlayerStatus {
@@ -51,6 +51,10 @@ signal score_changed(new_score: int)
 signal lives_changed(new_lives: int)
 signal player_caught
 
+var state_machine_component: Node
+var contact_death_component: Node
+var _death_emitted: bool = false
+
 func _ready():
 	# Setup BaseEntity first
 	entity_name = "Player"
@@ -68,6 +72,7 @@ func _ready():
 
 	# Setup player-specific stuff
 	setup_player_specifics()
+	setup_combat_components()
 
 	# Load abilities
 	load_player_abilities()
@@ -106,6 +111,32 @@ func load_player_abilities():
 	if ability_component:
 		ability_component.load_ability("blink")
 		print("⚡ Player abilities loaded")
+
+func setup_combat_components():
+	"""Setup reusable state/death components for contact combat."""
+	if not has_node("StateMachineComponent"):
+		var state_machine_script = load("res://components/StateMachineComponent.gd")
+		state_machine_component = state_machine_script.new()
+		state_machine_component.name = "StateMachineComponent"
+		add_child(state_machine_component)
+	else:
+		state_machine_component = $StateMachineComponent
+
+	if not has_node("ContactDeathComponent"):
+		var contact_death_script = load("res://components/ContactDeathComponent.gd")
+		contact_death_component = contact_death_script.new()
+		contact_death_component.name = "ContactDeathComponent"
+		add_child(contact_death_component)
+	else:
+		contact_death_component = $ContactDeathComponent
+
+	if state_machine_component and state_machine_component.has_method("set_state"):
+		state_machine_component.set_state(&"normal")
+
+	if contact_death_component and contact_death_component.has_method("setup"):
+		contact_death_component.setup(self, state_machine_component, contact_death_component.Team.PLAYER)
+		contact_death_component.contact_radius = 8.0
+		contact_death_component.defeated.connect(_on_defeated_by_contact)
 
 func create_hunter_timer():
 	"""Créer le timer pour le mode hunter"""
@@ -350,6 +381,8 @@ func activate_hunter_mode():
 
 		status_changed.emit(current_status)
 		hunter_mode_started.emit()
+		if state_machine_component and state_machine_component.has_method("set_state"):
+			state_machine_component.set_state(&"powered")
 
 func deactivate_hunter_mode():
 	"""Désactiver le mode hunter"""
@@ -366,6 +399,8 @@ func deactivate_hunter_mode():
 
 		status_changed.emit(current_status)
 		hunter_mode_ended.emit()
+		if state_machine_component and state_machine_component.has_method("set_state"):
+			state_machine_component.set_state(&"normal")
 
 func _on_hunter_timer_timeout():
 	"""Callback quand le timer du mode hunter expire"""
@@ -387,13 +422,9 @@ func get_remaining_hunter_time() -> float:
 
 func lose_life():
 	"""Lose a life - could trigger death if no lives left"""
-	lives -= 1
+	lives = maxi(0, lives - 1)
 	lives_changed.emit(lives)
 	print("💔 Lives remaining: ", lives)
-
-	if lives <= 0:
-		# Use the BaseEntity health system for death
-		take_damage(current_health)  # Kill the player
 
 func get_score() -> int:
 	return score
@@ -484,8 +515,46 @@ func update_animation(direction: Vector2):
 # === OVERRIDE BASEENTITY SIGNALS ===
 func _on_entity_died(_entity):
 	"""Handle player death"""
-	print("💀 Player died! Game Over!")
-	player_caught.emit()  # Emit signal expected by GameManager
+	defeat()
+
+func _on_defeated_by_contact(_victim: Node, _killer: Node):
+	lose_life()
+	defeat()
+
+func get_contact_death_component() -> Node:
+	return contact_death_component
+
+func is_defeated() -> bool:
+	return state_machine_component and state_machine_component.has_method("is_state") and state_machine_component.is_state(&"dead")
+
+func defeat() -> void:
+	if is_defeated():
+		return
+	if state_machine_component and state_machine_component.has_method("set_state"):
+		state_machine_component.set_state(&"dead")
+	visible = false
+	set_physics_process(false)
+	set_process_unhandled_input(false)
+	collision_layer = 0
+	collision_mask = 0
+	if not _death_emitted:
+		_death_emitted = true
+		player_caught.emit()
+
+func revive_at(spawn_pos: Vector2) -> void:
+	_death_emitted = false
+	visible = true
+	set_physics_process(true)
+	set_process_unhandled_input(true)
+	collision_layer = 2
+	collision_mask = 14
+	global_position = spawn_pos
+	velocity = Vector2.ZERO
+	current_direction = DIRECTIONS.right
+	target_direction = DIRECTIONS.right
+	deactivate_hunter_mode()
+	if state_machine_component and state_machine_component.has_method("set_state"):
+		state_machine_component.set_state(&"normal")
 
 func reset_for_level():
 	"""Reset player for new level"""
@@ -496,7 +565,7 @@ func reset_for_level():
 
 	# Reset position to spawn
 	if spawn_position != Vector2.ZERO:
-		global_position = spawn_position
+		revive_at(spawn_position)
 
 	# Reset movement
 	current_direction = DIRECTIONS.right

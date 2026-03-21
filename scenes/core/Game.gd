@@ -8,12 +8,14 @@ signal game_over
 @onready var player = $Player
 @onready var maze = $Maze
 
-var lives: int = 3
+var lives: int = 1
 var game_active: bool = true
 
 func _ready():
 	print("\n=== GAME._READY APPELÉ ===")
 	print("🎮 SimpleGame démarré")
+	if GameManager and GameManager.has_method("start_playing"):
+		GameManager.start_playing()
 
 	# Vérifier si un niveau spécifique a été demandé en mode debug
 	var scene_manager = get_node_or_null("/root/SceneManager")
@@ -138,6 +140,51 @@ func _process(_delta):
 		elif Input.is_action_just_pressed("ui_cancel"):
 			print("🎮 ÉCHAP détecté via _process - fermeture jeu")
 			get_tree().quit()
+	elif not game_active and has_node("DefeatScreen"):
+		if Input.is_action_just_pressed("dash"):
+			print("🎮 ESPACE détecté - recommencer le niveau")
+			call_deferred("restart_current_level")
+		elif Input.is_action_just_pressed("ui_cancel"):
+			print("🎮 ÉCHAP détecté - retour menu")
+			var scene_manager = get_node_or_null("/root/SceneManager")
+			if scene_manager and scene_manager.has_method("return_to_menu"):
+				scene_manager.return_to_menu()
+			else:
+				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+
+func _physics_process(_delta: float) -> void:
+	if not game_active:
+		return
+	if not _contact_check_queued:
+		_contact_check_queued = true
+		call_deferred("_post_physics_contact_check")
+
+func _post_physics_contact_check() -> void:
+	_contact_check_queued = false
+	if not game_active:
+		return
+	check_player_ghost_contacts()
+
+func check_player_ghost_contacts() -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	if not player.has_method("get_contact_death_component"):
+		return
+	var player_contact = player.get_contact_death_component()
+	if player_contact == null or not player_contact.has_method("resolve_contact_with"):
+		return
+
+	for ghost in get_tree().get_nodes_in_group("ghosts"):
+		if ghost == null or not is_instance_valid(ghost):
+			continue
+		if not ghost.has_method("get_contact_death_component"):
+			continue
+		var ghost_contact = ghost.get_contact_death_component()
+		if ghost_contact:
+			player_contact.resolve_contact_with(ghost_contact)
+
+	if player.has_method("is_defeated") and player.is_defeated():
+		trigger_player_defeat()
 
 func _on_dot_collected():
 	if player:
@@ -184,6 +231,8 @@ func update_level_display():
 func trigger_level_complete():
 	print("🎉 NIVEAU TERMINÉ !")
 	game_active = false
+	if GameManager and GameManager.has_method("set_game_state"):
+		GameManager.set_game_state(GameManager.GameState.VICTORY)
 	show_victory_screen()
 
 func show_victory_screen():
@@ -265,6 +314,16 @@ func _input(event):
 			print("🎮 ÉCHAP pressé - fermeture jeu")
 			get_tree().quit()
 
+	if not game_active and has_node("DefeatScreen"):
+		if event.is_action_pressed("dash"):
+			call_deferred("restart_current_level")
+		elif event.is_action_pressed("ui_cancel"):
+			var scene_manager = get_node_or_null("/root/SceneManager")
+			if scene_manager and scene_manager.has_method("return_to_menu"):
+				scene_manager.return_to_menu()
+			else:
+				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+
 	# Raccourci pour activer/désactiver le mode debug (F1)
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_F1:
@@ -281,8 +340,75 @@ func _unhandled_input(event):
 			print("🎮 ÉCHAP détecté (unhandled) - fermeture jeu")
 			get_tree().quit()
 
+	if not game_active and has_node("DefeatScreen"):
+		if Input.is_action_just_pressed("dash"):
+			call_deferred("restart_current_level")
+		elif Input.is_action_just_pressed("ui_cancel"):
+			var scene_manager = get_node_or_null("/root/SceneManager")
+			if scene_manager and scene_manager.has_method("return_to_menu"):
+				scene_manager.return_to_menu()
+			else:
+				get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+
+func trigger_player_defeat() -> void:
+	if not game_active:
+		return
+	print("💀 Joueur détruit par contact fantôme")
+	game_active = false
+	if GameManager and GameManager.has_method("on_player_died"):
+		GameManager.on_player_died()
+	show_defeat_screen()
+
+func show_defeat_screen() -> void:
+	if has_node("DefeatScreen"):
+		return
+	var defeat_layer = CanvasLayer.new()
+	defeat_layer.name = "DefeatScreen"
+	defeat_layer.layer = 100
+	add_child(defeat_layer)
+
+	var background = ColorRect.new()
+	background.size = get_viewport().get_visible_rect().size
+	background.color = Color(0, 0, 0, 0.78)
+	defeat_layer.add_child(background)
+
+	var center_container = CenterContainer.new()
+	center_container.size = get_viewport().get_visible_rect().size
+	defeat_layer.add_child(center_container)
+
+	var panel = PanelContainer.new()
+	panel.custom_minimum_size = Vector2(480, 280)
+	var panel_style = create_styled_box(Color(0.2, 0.05, 0.05, 0.95), Color(1.0, 0.3, 0.3), 12, 3)
+	panel.add_theme_stylebox_override("panel", panel_style)
+	center_container.add_child(panel)
+
+	var vbox = VBoxContainer.new()
+	apply_container_spacing(vbox, 16)
+	panel.add_child(vbox)
+
+	vbox.add_child(create_styled_label("💀 VOUS AVEZ ÉTÉ ATTRAPÉ", 30, Color(1, 0.4, 0.4)))
+	vbox.add_child(create_styled_label("Appuyez sur ESPACE pour recommencer ce niveau", 18, Color.WHITE))
+	vbox.add_child(create_styled_label("ÉCHAP pour revenir au menu", 16, Color(0.85, 0.85, 0.85)))
+
+func restart_current_level() -> void:
+	if GameManager and GameManager.has_method("begin_restart"):
+		GameManager.begin_restart()
+	if has_node("DefeatScreen"):
+		get_node("DefeatScreen").queue_free()
+	game_active = true
+	if player:
+		player.lives = 1
+		player.lives_changed.emit(player.lives)
+	reset_level_state(current_level)
+	if maze and player and player.has_method("revive_at"):
+		player.revive_at(maze.get_spawn_position())
+	if GameManager and GameManager.has_method("finish_restart"):
+		GameManager.finish_restart()
+
 func start_next_level():
 	print("🚀 Démarrage du niveau suivant...")
+	if GameManager and GameManager.has_method("set_game_state"):
+		GameManager.set_game_state(GameManager.GameState.RESTARTING)
 
 	# Incrémenter le niveau
 	current_level += 1
@@ -323,6 +449,8 @@ func start_next_level():
 	update_level_display()
 
 	print("✅ Nouveau niveau prêt !")
+	if GameManager and GameManager.has_method("set_game_state"):
+		GameManager.set_game_state(GameManager.GameState.PLAYING)
 
 var ui_score_label: Label
 var ui_lives_label: Label
@@ -331,6 +459,7 @@ var ui_level_label: Label
 var current_level: int = 1
 var debug_panel_node: Control  # Référence au panel de debug
 var debug_mode: bool = true  # Activer/désactiver le debug
+var _contact_check_queued: bool = false
 
 func create_ui_panel() -> Control:
 	# === PANEL UI RESPONSIVE (VERSION SIMPLIFIÉE) ===
@@ -350,7 +479,10 @@ func create_ui_panel() -> Control:
 	ui_score_label = create_styled_label("SCORE: 0", 22, Color.YELLOW)
 	vbox_main.add_child(ui_score_label)
 
-	ui_lives_label = create_styled_label("VIES: 3", 18, Color.RED)
+	var initial_lives: int = 1
+	if player and player.has_method("get_lives"):
+		initial_lives = int(player.get_lives())
+	ui_lives_label = create_styled_label("VIES: " + str(initial_lives), 18, Color.RED)
 	vbox_main.add_child(ui_lives_label)
 
 	ui_level_label = create_styled_label("NIVEAU: " + str(current_level), 18, Color.GREEN)
@@ -373,6 +505,8 @@ func create_ui_panel() -> Control:
 	if player:
 		player.score_changed.connect(_on_score_changed)
 		player.lives_changed.connect(_on_lives_changed)
+		_on_score_changed(player.get_score())
+		_on_lives_changed(player.get_lives())
 
 	return main_panel
 
@@ -478,6 +612,9 @@ func load_scene(scene_type: String):
 func _load_main_menu():
 	"""Charger le menu principal"""
 	print("🏠 Chargement du menu principal...")
+	if GameManager and GameManager.has_method("return_to_menu"):
+		GameManager.return_to_menu()
+		return
 
 	# Méthode 1: Via SceneManager (préféré)
 	var scene_manager = get_node_or_null("/root/SceneManager")
